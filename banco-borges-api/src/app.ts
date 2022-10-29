@@ -43,4 +43,4 @@ server.listen(port, () => {
         debugLog(`Rotas configuradas para ${route.getName()}`);
     });
     console.log(runningMessage);
-})
+});
