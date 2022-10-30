@@ -1,4 +1,6 @@
 import { CommonRoutesConfig } from "../common/common.routes.config";
+import clientsController from "./controllers/clients.controller";
+import clientsMiddleware from './middlewares/clients.middleware';
 import express from 'express';
 
 export class ClientsRoutes extends CommonRoutesConfig {
@@ -8,23 +10,21 @@ export class ClientsRoutes extends CommonRoutesConfig {
 
     configureRoutes(): express.Application {
         this.app.route(`/clients`)
-            .get((req: express.Request, res: express.Response) => {
-                res.status(200).send(`Lista de clientes`);
-            })
-            .post((req: express.Request, res: express.Response) => {
-                res.status(201).send(`Cria cliente`);
-            });
+            .get(clientsController.listClients)
+            .post(
+                clientsMiddleware.validateClientRepeated,
+                clientsMiddleware.validateRequiredClientBodyFields,
+                clientsController.createClient
+                );
 
-        this.app.route(`clients/:clientId`)
-            .get((req: express.Request, res: express.Response) => {
-                res.status(200).send(`GET requested for id ${req.params.clientId}`);
-            })
-            .put((req: express.Request, res: express.Response) => {
-                res.status(200).send(`PUT requested for id ${req.params.clientId}`);
-            })
-            .delete((req: express.Request, res: express.Response) => {
-                res.status(204).send(`DELETE requested for id ${req.params.clientId}`);
-            })
+        this.app.route(`clients/:cpfCnpj`)
+            .all(clientsMiddleware.validateClientExists)
+            .get(clientsController.getClientById)
+            .put(
+                clientsMiddleware.validateRequiredClientBodyFields,
+                clientsController.updateClient
+                )
+            .delete(clientsController.removeClient)
             
         return this.app;
     }
